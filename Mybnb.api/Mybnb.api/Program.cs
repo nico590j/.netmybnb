@@ -1,4 +1,16 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Mybnb.api.Data;
+using System;
+using Microsoft.Extensions.Configuration;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<MybnbapiContext>(options =>
+
+    options.UseSqlServer(builder.Configuration.GetConnectionString("MybnbapiContext") ?? throw new InvalidOperationException("Connection string 'MybnbapiContext' not found.")));
 
 // Add services to the container.
 
