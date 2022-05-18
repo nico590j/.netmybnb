@@ -1,13 +1,21 @@
 ﻿#nullable disable
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Mybnb.api.Data;
+using Mybnb.api.Helpers;
 using Mybnb.api.Models;
+using Mybnb.dtolibrary.DTOs;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Mybnb.api.Controllers
 {
@@ -16,14 +24,17 @@ namespace Mybnb.api.Controllers
     public class UsersController : ControllerBase
     {
         private readonly MybnbapiContext _context;
+        private readonly AppSettings _appSettings;
 
-        public UsersController(MybnbapiContext context)
+        public UsersController(MybnbapiContext context, AppSettings appSettings)
         {
             _context = context;
+            _appSettings = appSettings;
         }
 
         // GET: api/Users
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<User>>> GetUser()
         {
             return await _context.Users.ToListAsync();
@@ -31,6 +42,7 @@ namespace Mybnb.api.Controllers
 
         // GET: api/Users/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<User>> GetUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
@@ -46,6 +58,7 @@ namespace Mybnb.api.Controllers
         // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutUser(int id, User user)
         {
             if (id != user.UserID)
@@ -87,6 +100,7 @@ namespace Mybnb.api.Controllers
 
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
@@ -107,18 +121,43 @@ namespace Mybnb.api.Controllers
         }
 
         //CREATE LOGIN HERE
-        [HttpPost]
-        public async Task<ActionResult<User>> Authenticate(/*Authentication/User DTO*/)
+        [HttpPost("authenticate")]
+        public async Task<ActionResult<User>> Authenticate(Authenticate model)
         {
-            //_context.Users.Add(user);
-            //await _context.SaveChangesAsync();
-            throw new NotImplementedException();
-            //Return Token //CreatedAtAction("GetUser", new { id = user.UserID }, user);
+            var user = _context.Users.SingleOrDefault(x => x.Email == model.Email && x.Password == model.Password);
+
+            // return null if user not found
+            if (user == null)
+                return BadRequest(new { message = "Username or password is incorrect" });
+
+            // authentication successful so generate jwt token
+            var token = GenerateJWTToken(user);
+
+            var response = new AuthenticateResponse(user.UserID, user.Email, token);
+
+            return Ok(response);
         }
+        [HttpGet]
+        [Authorize]
+        [Route("logout")]
         public async Task<ActionResult> Logout()
         {
             //Get Token and logout user 
             throw new NotImplementedException();
+        }
+
+        private string GenerateJWTToken(User user)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[] { new Claim("id", user.UserID.ToString()) }),
+                Expires = DateTime.UtcNow.AddDays(7),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
         }
     }
 }

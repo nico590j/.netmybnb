@@ -3,16 +3,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Mybnb.api.Data;
 using Mybnb.api.Models;
+using Mybnb.dtolibrary.DTOs.BNB;
 //Add Tenant and renting periods to this controller and delete the others
 namespace Mybnb.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class BNBsController : ControllerBase
     {
         private readonly MybnbapiContext _context;
@@ -75,7 +78,6 @@ namespace Mybnb.api.Controllers
         }
 
         // POST: api/BNBs
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<BNB>> PostBNB(BNB bNB)
         {
@@ -99,6 +101,19 @@ namespace Mybnb.api.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpPost("TenantPeriod")]
+        public async Task<ActionResult<BNB>> BNBAddTenantPeriod(BNBResponse bNBRequest, TenantPeriodRequest tenantPeriodRequest)
+        {
+            BNB bNB = _context.BNBs.Single(x => x.ID == bNBRequest.ID);
+            User user = _context.Users.Single(x => x.UserID == tenantPeriodRequest.Tenant.Id);
+            TenantPeriod tenantPeriod = new TenantPeriod { EndDate = tenantPeriodRequest.EndDate, StartDate = tenantPeriodRequest.StartDate, Tenant = user };
+            bNB.TenantPeriods.Add(tenantPeriod);
+
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetTenantPeriod", new { id = bNB.ID }, new TenantPeriodResponse { EndDate = tenantPeriod.EndDate, StartDate = tenantPeriod.StartDate, Tenant = tenantPeriodRequest.Tenant, TenantPeriodID = tenantPeriod.TenantPeriodID });
         }
 
         private bool BNBExists(int id)

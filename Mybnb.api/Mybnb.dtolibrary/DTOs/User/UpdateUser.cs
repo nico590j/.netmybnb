@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace Mybnb.dtolibrary.DTOs.User
 {
-    class UpdateUser
+    public class UpdateUser
     {
+        public string FullName { get; set; }
+        public string Email { get; set; }
     }
 }

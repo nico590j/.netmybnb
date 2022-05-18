@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Mybnb.dtolibrary.DTOs.BNB
 {
-    class AddTenantPeriod
+    public class BNBImageDTO
     {
+        public byte[] Image { get; set; }
     }
 }
