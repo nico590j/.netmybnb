@@ -7,12 +7,29 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="APIDATA\mybnbApi.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="3.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.5" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="NSwag.ApiDescription.Client" Version="13.0.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Mybnb.dtolibrary\Mybnb.dtolibrary.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <OpenApiReference Include="APIDATA\mybnbApi.json" CodeGenerator="NSwagCSharp" />
   </ItemGroup>
 
 </Project>

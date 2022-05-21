@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32421.90
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mybnb.api", "Mybnb.api\Mybnb.api.csproj", "{5D9B19AB-7FCC-43AC-893D-1F6B546CA369}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mybnb.api", "Mybnb.api\Mybnb.api.csproj", "{5D9B19AB-7FCC-43AC-893D-1F6B546CA369}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mybnb.blazor", "Mybnb.blazor\Mybnb.blazor.csproj", "{109A2476-EAC7-4D9B-845A-2EFCCECCB115}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mybnb.blazor", "Mybnb.blazor\Mybnb.blazor.csproj", "{109A2476-EAC7-4D9B-845A-2EFCCECCB115}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mybnb.dtolibrary", "Mybnb.dtolibrary\Mybnb.dtolibrary.csproj", "{CD71050C-902E-47A0-98D6-1AF0CF61175E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mybnb.dtolibrary", "Mybnb.dtolibrary\Mybnb.dtolibrary.csproj", "{CD71050C-902E-47A0-98D6-1AF0CF61175E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

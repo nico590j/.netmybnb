@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mybnb.dtolibrary.DTOs.User;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,6 @@ namespace Mybnb.dtolibrary.DTOs.BNB
         public int TenantPeriodID { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public AuthenticateResponse Tenant { get; set; }
+        public UserResponse Tenant { get; set; }
     }
 }

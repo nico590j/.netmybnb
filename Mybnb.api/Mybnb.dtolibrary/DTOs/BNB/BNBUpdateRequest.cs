@@ -7,11 +7,9 @@ using System.Threading.Tasks;
 
 namespace Mybnb.dtolibrary.DTOs.BNB
 {
-    public class BNBResponse
+    public class BNBUpdateRequest
     {
         public int ID { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
         public string Address { get; set; }
         public string ZipCode { get; set; }
         public string Country { get; set; }
