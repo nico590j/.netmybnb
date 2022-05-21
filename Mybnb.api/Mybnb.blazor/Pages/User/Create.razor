@@ -4,6 +4,7 @@
 @using System.Net.Http;
 @using System.Text.Json.Serialization;
 @using Mybnb.dtolibrary.DTOs.User;
+@inject NavigationManager NavigationManager;
 @inject ILogger<CreateUser> Logger
 
 @if (success)
@@ -29,7 +30,7 @@
     private CreateUser createUser = new();
     private bool success = false;
 
-    private void HandleValidSubmit()
+    private async void HandleValidSubmit()
     {
         Logger.LogInformation("HandleValidSubmit called");
 
@@ -41,5 +42,7 @@
         {
             success = true;
         }
+        await Task.Delay(500);
+        NavigationManager.NavigateTo("login");
     }
 }

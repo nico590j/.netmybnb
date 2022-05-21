@@ -1,4 +1,4 @@
-﻿@page "/allbnblistings"
+﻿@page "/bnb/{id?}"
 @using System.Text.Json
 @using System.Text.Json.Serialization;
 @using Mybnb.dtolibrary.DTOs.BNB;
@@ -20,22 +20,35 @@ else
     }
     else
     {
-        <ul>
-            @foreach (var bnb in bnbs)
-            {
-                <li>
-                    <h2>@bnb.Title</h2>
-                    <p>@bnb.Description</p>
-                    <p>@bnb.Address, @bnb.ZipCode</p>
-                    <p><a href="/bnb/@bnb.ID">Se bnb</a></p>
-                </li>
-            }
-        </ul>
+        @if (bnb != null) {
+            <table>
+               <tr>
+                   <td colspan="4"><h2>@bnb.Title</h2></td>
+               </tr>
+               <tr>
+                   <td><p>@bnb.Description</p></td>     
+                   <td><p>@bnb.Address, @bnb.ZipCode</p></td>
+                   <td><p><a href="/add-tenting-period/@bnb.ID">Tilføj udlejningsperiode</a></p></td>
+                   <td><p><a href="/edit-bnb/@bnb.ID">Rediger</a></p></td>
+               </tr>
+               @if(bnb.RentingPeriods != null){
+                    @foreach (var rentingperiod in @bnb.RentingPeriods)
+                    {
+                         <RentingPeriod Period=rentingperiod />
+                    }
+                }
+            
+
+            </table>
+        }
     }
 }
 
 @code {
-    private IEnumerable<BNBResponse> bnbs = new List<BNBResponse>();
+    [Parameter]
+    public string? id { get; set; }
+
+    private BNBResponse bnb;
     private bool getBnbsError;
     private bool shouldRender;
     string userdata;
@@ -62,16 +75,7 @@ else
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await GetJWT());
             var request = new mybnbApiClient("https://localhost:7258", httpClient);
 
-            var allBnbs = await request.BNBsAllAsync();
-
-            if (allBnbs != null)
-            {
-                bnbs = (IEnumerable<BNBResponse>)allBnbs.ToList();
-            }
-            else
-            {
-                getBnbsError = true;
-            }
+            bnb = await request.GetSingleBNB(int.Parse(id));
 
             shouldRender = true;
 

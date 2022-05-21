@@ -18,6 +18,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Mybnb.dtolibrary.DTOs.User;
 using Microsoft.Extensions.Options;
+using System.Security.Cryptography;
 
 namespace Mybnb.api.Controllers
 {
@@ -94,7 +95,10 @@ namespace Mybnb.api.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(CreateUser createUser)
         {
-            User user = new User { Email = createUser.Email, FullName = createUser.FullName, Password = createUser.Password };
+
+            string hashedPassword = EncryptPassword(createUser.Password);
+
+            User user = new User { Email = createUser.Email, FullName = createUser.FullName, Password = hashedPassword };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
@@ -127,7 +131,10 @@ namespace Mybnb.api.Controllers
         [HttpPost("authenticate")]
         public async Task<ActionResult<User>> Authenticate(AuthenticateRequest model)
         {
-            var user = _context.Users.SingleOrDefault(x => x.Email == model.Email && x.Password == model.Password);
+
+            string hashedPassword = EncryptPassword(model.Password);
+
+            var user = _context.Users.SingleOrDefault(x => x.Email == model.Email && x.Password == hashedPassword);
 
             // return null if user not found
             if (user == null)
@@ -161,6 +168,24 @@ namespace Mybnb.api.Controllers
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+        }
+
+        private string EncryptPassword(string password)
+        {
+            byte[] inputBytes = Encoding.UTF8.GetBytes(password);
+
+            var algorithm = SHA256.Create();
+
+            byte[] hashedBytes = algorithm.ComputeHash(inputBytes);
+
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < hashedBytes.Length; i++)
+            {
+                builder.Append(hashedBytes[i].ToString("X2"));
+            }
+            string result = builder.ToString();
+            
+            return result;
         }
     }
 }

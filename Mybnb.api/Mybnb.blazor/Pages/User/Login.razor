@@ -7,12 +7,17 @@
 @using Mybnb.dtolibrary.DTOs.User;
 @inject ILogger<CreateUser> Logger
 @inject IJSRuntime jsr
+@inject NavigationManager NavigationManager;
 
 <h3>Login</h3>
 
 @if (success)
 {
     <h2>Du er nu logget ind</h2>
+}
+
+@if(message != null){
+    <p>@message</p>
 }
 
 <EditForm Model="@authenticateModel" OnValidSubmit="@HandleValidSubmit">
@@ -32,6 +37,7 @@
     private AuthenticateRequest authenticateModel = new();
     private bool success = false;
     bool isDisabled = false;
+    string message;
 
     private async void HandleValidSubmit()
     {
@@ -40,15 +46,26 @@
 
         // Process the valid form
         var request = new mybnbApiClient("https://localhost:7258", new HttpClient());
-
-        var allBnbs = await request.AuthenticateAsync(authenticateModel);
-        isDisabled = false;
-        if (allBnbs != null)
+        message = null;
+        try
         {
-            success = true;
+            var allBnbs = await request.AuthenticateAsync(authenticateModel);
+
+            if (allBnbs != null)
+            {
+                success = true;
+                isDisabled = false;
+                await jsr.InvokeVoidAsync("localStorage.setItem", "user", $"{allBnbs.Id};{allBnbs.Token}").ConfigureAwait(false);
+
+            }
+        } catch (Exception e)
+        {
             isDisabled = false;
-            await jsr.InvokeVoidAsync("localStorage.setItem", "user", $"{allBnbs.Id};{allBnbs.Token}").ConfigureAwait(false);
-            
+            message = e.Message;
         }
+        InvokeAsync(StateHasChanged);
+
+        await Task.Delay(500);
+        NavigationManager.NavigateTo("allbnblistings");
     }
 }

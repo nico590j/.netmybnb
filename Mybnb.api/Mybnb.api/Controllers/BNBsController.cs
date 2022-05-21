@@ -29,23 +29,68 @@ namespace Mybnb.api.Controllers
 
         // GET: api/BNBs
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BNB>>> GetBNB()
+        public async Task<ActionResult<IEnumerable<BNBResponse>>> GetBNB()
         {
-            return await _context.BNBs.ToListAsync();
+            List<BNBResponse> result = new List<BNBResponse>();
+            var bnbs = await _context.BNBs.ToListAsync();
+
+            bnbs.ForEach(bnb => result.Add(new BNBResponse
+            {
+                ID = bnb.ID,
+                Description = bnb.Description,
+                Title = bnb.Title,
+                Address = bnb.Address,
+                Country = bnb.Country,
+                ZipCode = bnb.ZipCode,
+                TypeOfEstablishment = bnb.TypeOfEstablishment
+            }));
+
+            return result;
         }
 
         // GET: api/BNBs/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<BNB>> GetBNB(int id)
+        public async Task<ActionResult<BNBResponse>> GetBNB(int id)
         {
-            var bNB = await _context.BNBs.FindAsync(id);
+            var bNB = await _context.BNBs.Include(x => x.RentingPeriods).Include(x => x.TenantPeriods).SingleAsync(x => x.ID == id);
 
             if (bNB == null)
             {
                 return NotFound();
             }
 
-            return bNB;
+            BNBResponse bNBResponse = new BNBResponse();
+            bNBResponse.ID = bNB.ID;
+            bNBResponse.Address = bNB.Address;
+            bNBResponse.ZipCode = bNB.ZipCode;
+            bNBResponse.Country = bNB.Country;
+            bNBResponse.Title = bNB.Title;
+            bNBResponse.Description = bNB.Description;
+            bNBResponse.TypeOfEstablishment = bNB.TypeOfEstablishment;
+
+            List<PossibleRentingPeriodResponse> possibleRentingPeriodResponse = new List<PossibleRentingPeriodResponse>();
+
+            bNB.RentingPeriods.ForEach(x => possibleRentingPeriodResponse.Add(
+                new PossibleRentingPeriodResponse{ 
+                    PossibleRentingPeriodID = x.PossibleRentingPeriodID,
+                    DailyPrice = x.DailyPrice, 
+                    EndDate = x.EndDate, 
+                    MinimumRentingDays = x.MinimumRentingDays,
+                    StartDate = x.StartDate
+                }
+            ));
+            bNBResponse.RentingPeriods = possibleRentingPeriodResponse;
+
+            bNB.TenantPeriods.ForEach(x => bNBResponse.TenantPeriods.Add(
+                new TenantPeriodResponse
+                {
+                    TenantPeriodID = x.TenantPeriodID,
+                    EndDate = x.EndDate,
+                    StartDate = x.StartDate
+                }
+            ));
+
+            return bNBResponse;
         }
 
         // PUT: api/BNBs/5
@@ -81,8 +126,26 @@ namespace Mybnb.api.Controllers
 
         // POST: api/BNBs
         [HttpPost]
-        public async Task<ActionResult<BNB>> PostBNB(BNB bNB)
+        public async Task<ActionResult<BNBResponse>> PostBNB(CreateBNB createBNB)
         {
+            User user = CheckUserExists();
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+
+            BNB bNB = new BNB();
+            bNB.Title = createBNB.Title;
+            bNB.Description = createBNB.Description;
+            bNB.Address = createBNB.Address;
+            bNB.ZipCode = createBNB.ZipCode;
+            bNB.Country = createBNB.Country;
+            bNB.TypeOfEstablishment = createBNB.TypeOfEstablishment;
+            bNB.Owner = user;
+            bNB.Images = new List<BnbImage>();
+            bNB.RentingPeriods = new List<PossibleRentingPeriod>();
+            bNB.TenantPeriods = new List<TenantPeriod>();
+
             _context.BNBs.Add(bNB);
             await _context.SaveChangesAsync();
 
@@ -105,79 +168,21 @@ namespace Mybnb.api.Controllers
             return NoContent();
         }
 
-        [HttpPost("TenantPeriod")]
-        public async Task<ActionResult<BNB>> BNBAddTenantPeriod(BNBUpdateRequest bNBRequest)
-        {
-            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (bNBRequest.Owner.Id != int.Parse(userId))
-            {
-                return Unauthorized();
-            }
-
-            BNB bNB = _context.BNBs.Single(x => x.ID == bNBRequest.ID);
-            BNBResponse bNBResponse = new BNBResponse();
-            bNBResponse.ID = bNBRequest.ID;
-            bNBResponse.Address = bNBRequest.Address;
-            bNBResponse.ZipCode = bNBRequest.ZipCode;
-            bNBResponse.Country = bNBRequest.Country;
-            bNBResponse.Images = bNBRequest.Images;
-
-            foreach (var tenantPeriodRequest in bNBRequest.TenantPeriods)
-            {
-                User user = _context.Users.Single(x => x.UserID == tenantPeriodRequest.Tenant.Id);
-                TenantPeriod tenantPeriod = new TenantPeriod { EndDate = tenantPeriodRequest.EndDate, StartDate = tenantPeriodRequest.StartDate, Tenant = user };
-                bNB.TenantPeriods.Add(tenantPeriod);
-            }
-            
-            await _context.SaveChangesAsync();
-
-            bNB.TenantPeriods.ForEach(x => bNBResponse.TenantPeriods.Add(new TenantPeriodResponse { EndDate = x.EndDate, StartDate = x.StartDate, TenantPeriodID = x.TenantPeriodID, Tenant = new UserResponse { Id = x.Tenant.UserID, Email = x.Tenant.Email } })); 
-            return CreatedAtAction("GetTenantPeriod", new { id = bNB.ID }, bNBResponse);
-        }
-
-        [HttpPost("BNBRendingPeriod")]
-        public async Task<ActionResult<BNB>> BNBAddRendingPeriod(BNBUpdateRequest bNBRequest)
-        {
-            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (bNBRequest.Owner.Id != int.Parse(userId))
-            {
-                return Unauthorized();
-            }
-
-            BNB bNB = _context.BNBs.Single(x => x.ID == bNBRequest.ID);
-            BNBResponse bNBResponse = new BNBResponse();
-            bNBResponse.ID = bNBRequest.ID;
-            bNBResponse.Address = bNBRequest.Address;
-            bNBResponse.ZipCode = bNBRequest.ZipCode;
-            bNBResponse.Country = bNBRequest.Country;
-            bNBResponse.Images = bNBRequest.Images;
-
-            foreach (var rentingPeriodRequest in bNBRequest.RentingPeriods)
-            {
-                PossibleRentingPeriod rentingPeriod = new PossibleRentingPeriod { 
-                    EndDate = rentingPeriodRequest.EndDate, 
-                    StartDate = rentingPeriodRequest.StartDate, 
-                    DailyPrice = rentingPeriodRequest.DailyPrice, 
-                    MinimumRentingDays = rentingPeriodRequest.MinimumRentingDays};
-
-                bNB.RentingPeriods.Add(rentingPeriod);
-            }
-
-            await _context.SaveChangesAsync();
-
-            bNB.RentingPeriods.ForEach(x => bNBResponse.RentingPeriods.Add(new PossibleRentingPeriodResponse { 
-                EndDate = x.EndDate, 
-                StartDate = x.StartDate, 
-                PossibleRentingPeriodID = x.PossibleRentingPeriodID,
-                DailyPrice = x.DailyPrice,
-                MinimumRentingDays = x.MinimumRentingDays
-            }));
-            return CreatedAtAction("GetTenantPeriod", new { id = bNB.ID }, bNBResponse);
-        }
-
         private bool BNBExists(int id)
         {
             return _context.BNBs.Any(e => e.ID == id);
+        }
+
+        private User CheckUserExists()
+        {
+            string userId = User.Claims.First().Value.First().ToString();
+
+            if(string.IsNullOrWhiteSpace(userId))
+                return null;
+            
+            User user = _context.Users.Single(x => x.UserID == int.Parse(userId));
+
+            return user;
         }
     }
 }

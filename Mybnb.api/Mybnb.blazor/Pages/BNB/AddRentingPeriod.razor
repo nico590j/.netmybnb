@@ -1,4 +1,4 @@
-﻿@page "/createbnb"
+﻿@page "/add-tenting-period/{bnbid?}"
 @using Microsoft.Extensions.Logging;
 @using System.Text.Json;
 @using System.Net.Http;
@@ -18,24 +18,20 @@ else
     {
         <h2>Din bolig er nu oprettet i vores system</h2>
     }
-    <EditForm Model="@createBnb" OnValidSubmit="@HandleValidSubmit">
+    <EditForm Model="@rentingPeriodRequest" OnValidSubmit="@HandleValidSubmit">
         <DataAnnotationsValidator />
         <ValidationSummary />
-        <label>Overskrift: <InputText id="Title" @bind-Value="createBnb.Title" />
+        <label for="StartDate">Start Date: <InputDate id="StartDate" @bind-Value="rentingPeriodRequest.StartDate" />
         </label><br />
-        <label> Beskrivelse:
-        <InputText id="Description" @bind-Value="createBnb.Description" />
+        <label for="EndDate"> End Date:
+        <InputDate id="EndDate" @bind-Value="rentingPeriodRequest.EndDate" />
         </label><br />
-        <label for="Address"> Adresse
-            <InputText id="Address" @bind-Value="createBnb.Address" />
+        <label for="DailyPrice"> DailyPricde
+            <InputNumber id="DailyPrice" @bind-Value="rentingPeriodRequest.DailyPrice" />
         </label>
         <br />
-        <label for="ZipCode"> Postnr.
-            <InputText id="ZipCode" @bind-Value="createBnb.ZipCode" />
-        </label>
-        <br />
-        <label for="Country"> Land
-            <InputText id="Country" @bind-Value="createBnb.Country" />
+        <label for="ZipCode"> Minimum days.
+            <InputNumber id="ZipCode" @bind-Value="rentingPeriodRequest.MinimumRentingDays" />
         </label>
         <br />
 
@@ -44,7 +40,10 @@ else
 }
 
 @code {
-    private CreateBNB createBnb = new();
+    [Parameter]
+    public string? bnbid { get; set; }
+
+    private PossibleRentingPeriodRequest rentingPeriodRequest = new();
     private bool success = false;
     private string userdata;
 
@@ -68,10 +67,9 @@ else
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await GetJWT());
         var request = new mybnbApiClient("https://localhost:7258", httpClient);
 
-        createBnb.TypeOfEstablishment = dtolibrary.DTOs.BNBTypes.Apartment;
-        var allBnbs = await request.CreateBNBsAsync(createBnb);
+        var response = await request.CreatePossibleRentingPeriodsAsync(int.Parse(bnbid), rentingPeriodRequest);
 
-        if (allBnbs != null)
+        if (response != null)
         {
             success = true;
         }

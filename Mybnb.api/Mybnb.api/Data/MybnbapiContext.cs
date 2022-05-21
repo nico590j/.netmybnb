@@ -24,5 +24,13 @@ namespace Mybnb.api.Data
         public DbSet<Mybnb.api.Models.TenantPeriod> TenantPeriods { get; set; }
 
         public DbSet<Mybnb.api.Models.BnbImage>  Images { get; set; }
+
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>()
+                         .HasIndex(user => user.Email)
+                         .IsUnique();
+        }
     }
 }
