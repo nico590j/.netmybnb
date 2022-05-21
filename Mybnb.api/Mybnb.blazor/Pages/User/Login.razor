@@ -1,0 +1,54 @@
+﻿@page "/login"
+@using Microsoft.Extensions.Logging;
+@using System.Text.Json;
+@using System.Net.Http;
+@using System.Text.Json.Serialization;
+@using Mybnb.dtolibrary.DTOs
+@using Mybnb.dtolibrary.DTOs.User;
+@inject ILogger<CreateUser> Logger
+@inject IJSRuntime jsr
+
+<h3>Login</h3>
+
+@if (success)
+{
+    <h2>Du er nu logget ind</h2>
+}
+
+<EditForm Model="@authenticateModel" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <label for="Email"> Email: 
+    <InputText id="Email" placeholder="Indtast din email her:" @bind-Value="authenticateModel.Email" />
+    </label>
+    <label for="Password"> Kodeord
+        <InputText type=password  placeholder="Indtast dit password her:" id="Password" @bind-Value="authenticateModel.Password" />
+    </label>
+
+    <button type="submit" disabled="@isDisabled">Submit</button>
+</EditForm>
+
+@code {
+    private AuthenticateRequest authenticateModel = new();
+    private bool success = false;
+    bool isDisabled = false;
+
+    private async void HandleValidSubmit()
+    {
+        isDisabled = true;
+        Logger.LogInformation("HandleValidSubmit called");
+
+        // Process the valid form
+        var request = new mybnbApiClient("https://localhost:7258", new HttpClient());
+
+        var allBnbs = await request.AuthenticateAsync(authenticateModel);
+        isDisabled = false;
+        if (allBnbs != null)
+        {
+            success = true;
+            isDisabled = false;
+            await jsr.InvokeVoidAsync("localStorage.setItem", "user", $"{allBnbs.Id};{allBnbs.Token}").ConfigureAwait(false);
+            
+        }
+    }
+}

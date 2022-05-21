@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Mybnb.dtolibrary.DTOs
 {
-    public class Authenticate
+    public class AuthenticateRequest
     {
         [Required]
         public string Email { get; set; }

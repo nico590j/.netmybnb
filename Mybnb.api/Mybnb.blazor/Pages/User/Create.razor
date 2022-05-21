@@ -1,0 +1,45 @@
+﻿@page "/createuser"
+@using Microsoft.Extensions.Logging;
+@using System.Text.Json;
+@using System.Net.Http;
+@using System.Text.Json.Serialization;
+@using Mybnb.dtolibrary.DTOs.User;
+@inject ILogger<CreateUser> Logger
+
+@if (success)
+{
+    <h2>Du er nu logget ind</h2>
+}
+<EditForm Model="@createUser" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <label>Fulde navn: <InputText id="FullName" @bind-Value="createUser.FullName" />
+    </label><br />
+    <label> Email:
+    <InputText id="Email" @bind-Value="createUser.Email" />
+    </label><br />
+    <label for="Password"> Password
+        <InputText type=password id="Password" @bind-Value="createUser.Password" />
+    </label>
+
+    <button type="submit">Submit</button>
+</EditForm>
+
+@code {
+    private CreateUser createUser = new();
+    private bool success = false;
+
+    private void HandleValidSubmit()
+    {
+        Logger.LogInformation("HandleValidSubmit called");
+
+        // Process the valid form
+        var request = new mybnbApiClient("https://localhost:7258", new HttpClient());
+
+        var allBnbs = request.UsersAsync(createUser);
+        if (allBnbs.IsCompletedSuccessfully)
+        {
+            success = true;
+        }
+    }
+}

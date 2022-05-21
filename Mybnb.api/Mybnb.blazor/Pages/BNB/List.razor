@@ -1,0 +1,80 @@
+﻿@page "/allbnblistings"
+@using System.Text.Json
+@using System.Text.Json.Serialization;
+@using Mybnb.dtolibrary.DTOs.BNB;
+@using System.Net.Http;
+@using System.Net.Http.Headers;
+@inject IJSRuntime jsr;
+
+@if (string.IsNullOrEmpty(userdata))
+{
+	<p><a href="/login">LOGIN FOR AT SE DENNE</a></p>
+}
+else
+{
+    <h1>Call web API from a Blazor Server Razor component</h1>
+
+    @if (getBnbsError)
+    {
+        <p>Unable to get bnbs from mybnbapi. Please try again later.</p>
+    }
+    else
+    {
+        <ul>
+            @foreach (var bnb in bnbs)
+            {
+                <li>
+                    <h2>@bnb.Title</h2>
+                    <p>@bnb.Description</p>
+                    <p>@bnb.Address, @bnb.ZipCode</p>
+                </li>
+            }
+        </ul>
+    }
+}
+
+@code {
+    private IEnumerable<BNBResponse> bnbs = new List<BNBResponse>();
+    private bool getBnbsError;
+    private bool shouldRender;
+    string userdata;
+
+    private async Task<string> GetJWT()
+    {
+        userdata = await jsr.InvokeAsync<string>("localStorage.getItem", "user").ConfigureAwait(false);
+        if (!string.IsNullOrWhiteSpace(userdata))
+        {
+            var dataArray = userdata.Split(';', 2);
+            if (dataArray.Length == 2)
+                return dataArray[1];
+        }
+        return null;
+    }
+
+    protected override bool ShouldRender() => shouldRender;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            HttpClient httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await GetJWT());
+            var request = new mybnbApiClient("https://localhost:7258", httpClient);
+
+            var allBnbs = await request.BNBsAllAsync();
+
+            if (allBnbs != null)
+            {
+                bnbs = (IEnumerable<BNBResponse>)allBnbs.ToList();
+            }
+            else
+            {
+                getBnbsError = true;
+            }
+
+            shouldRender = true;
+
+            InvokeAsync(StateHasChanged);
+        }
+    }
+}

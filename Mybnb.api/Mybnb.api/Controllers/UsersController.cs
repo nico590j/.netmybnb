@@ -16,6 +16,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
+using Mybnb.dtolibrary.DTOs.User;
+using Microsoft.Extensions.Options;
 
 namespace Mybnb.api.Controllers
 {
@@ -26,10 +28,10 @@ namespace Mybnb.api.Controllers
         private readonly MybnbapiContext _context;
         private readonly AppSettings _appSettings;
 
-        public UsersController(MybnbapiContext context, AppSettings appSettings)
+        public UsersController(MybnbapiContext context, IOptions<AppSettings> appSettings)
         {
             _context = context;
-            _appSettings = appSettings;
+            _appSettings = appSettings.Value;
         }
 
         // GET: api/Users
@@ -90,8 +92,9 @@ namespace Mybnb.api.Controllers
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
+        public async Task<ActionResult<User>> PostUser(CreateUser createUser)
         {
+            User user = new User { Email = createUser.Email, FullName = createUser.FullName, Password = createUser.Password };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
@@ -122,7 +125,7 @@ namespace Mybnb.api.Controllers
 
         //CREATE LOGIN HERE
         [HttpPost("authenticate")]
-        public async Task<ActionResult<User>> Authenticate(Authenticate model)
+        public async Task<ActionResult<User>> Authenticate(AuthenticateRequest model)
         {
             var user = _context.Users.SingleOrDefault(x => x.Email == model.Email && x.Password == model.Password);
 

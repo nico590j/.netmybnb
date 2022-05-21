@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Mybnb.dtolibrary.DTOs.User
 {
-    public class CreateUser
+    public class UserResponse
     {
-        public string FullName { get; set; }
+        public int Id { get; set; }
         public string Email { get; set; }
-        public string Password { get; set; }
     }
 }
