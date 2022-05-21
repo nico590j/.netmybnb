@@ -1,0 +1,12 @@
+﻿<h3>RentingPeriod</h3>
+
+<div>
+	<h1>PeriodID: @Period.PossibleRentingPeriodID</h1>
+	<p>StartDate: @Period.StartDate</p>
+	<p>EndDate: @Period.EndDate</p>
+</div>
+
+@code {
+	[Parameter]
+	public Mybnb.dtolibrary.DTOs.BNB.PossibleRentingPeriodResponse Period { get; set; }
+}

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -78,9 +79,17 @@ namespace Mybnb.api.Controllers
 
         // POST: api/TenantPeriods
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<TenantPeriod>> PostTenantPeriod(TenantPeriod tenantPeriod)
+        [HttpPost("bnb/{bnbID}")]
+        public async Task<ActionResult<TenantPeriod>> PostTenantPeriod(int bnbID, TenantPeriod tenantPeriod)
         {
+            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            BNB bNB = _context.BNBs.Include(x => x.TenantPeriods).Single();
+
+            if (bNB.TenantPeriods.Any(x => x.Tenant.UserID == int.Parse(userId)))
+            {
+                return BadRequest();
+            }
+
             _context.TenantPeriods.Add(tenantPeriod);
             await _context.SaveChangesAsync();
 

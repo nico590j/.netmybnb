@@ -14,10 +14,6 @@ namespace Mybnb.dtolibrary.DTOs.BNB
         public string ZipCode { get; set; }
         public string Country { get; set; }
         public List<BNBImageDTO> Images { get; set; }
-
-        public List<PossibleRentingPeriodResponse> RentingPeriods { get; set; }
-        public List<TenantPeriodResponse> TenantPeriods { get; set; }
-
         public BNBTypes TypeOfEstablishment { get; set; }
         public UserResponse Owner { get; set; }
     }
