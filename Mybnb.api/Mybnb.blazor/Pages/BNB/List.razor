@@ -7,7 +7,7 @@
 @using System.Net.Http.Headers;
 @inject IJSRuntime jsr;
 
-@if (string.IsNullOrEmpty(userdata))
+@if (string.IsNullOrWhiteSpace(userdata))
 {
 	<p><a href="/login">LOGIN FOR AT SE DENNE</a></p>
 }

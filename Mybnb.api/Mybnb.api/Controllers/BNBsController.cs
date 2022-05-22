@@ -17,7 +17,7 @@ namespace Mybnb.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class BNBsController : ControllerBase
     {
         private readonly MybnbapiContext _context;

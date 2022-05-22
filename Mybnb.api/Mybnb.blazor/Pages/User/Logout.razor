@@ -6,11 +6,11 @@
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-        {
+        //if (firstRender)
+        //{
 			await base.OnInitializedAsync();
 			await jsr.InvokeVoidAsync("localStorage.removeItem", "user").ConfigureAwait(false);
 			nav.NavigateTo("/");
-		}
+		//}
 	}
 }
