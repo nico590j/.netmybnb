@@ -96,14 +96,24 @@ namespace Mybnb.api.Controllers
         // PUT: api/BNBs/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBNB(int id, BNB bNB)
+        public async Task<IActionResult> PutBNB(int id, BNBRequest bNBRequest)
         {
-            if (id != bNB.ID)
+            if (id != bNBRequest.ID)
             {
                 return BadRequest();
             }
 
-            _context.Entry(bNB).State = EntityState.Modified;
+            BNB bnb = new BNB
+            {
+                ID = bNBRequest.ID,
+                Title = bNBRequest.Title,
+                Description = bNBRequest.Description,
+                Address = bNBRequest.Address,
+                Country = bNBRequest.Country,
+                ZipCode = bNBRequest.ZipCode                
+            };
+
+            _context.Entry(bnb).State = EntityState.Modified;
 
             try
             {
@@ -126,7 +136,7 @@ namespace Mybnb.api.Controllers
 
         // POST: api/BNBs
         [HttpPost]
-        public async Task<ActionResult<BNBResponse>> PostBNB(CreateBNB createBNB)
+        public async Task<ActionResult<BNBResponse>> PostBNB(BNBRequest createBNB)
         {
             User user = CheckUserExists();
             if (user == null)

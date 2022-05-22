@@ -31,6 +31,7 @@ else
                    <td><p>@bnb.Address, @bnb.ZipCode</p></td>
                    <td><p><a href="/add-tenting-period/@bnb.ID">Tilføj udlejningsperiode</a></p></td>
                    <td><p><a href="/edit-bnb/@bnb.ID">Rediger</a></p></td>
+                   <td><button onclick=@(() => EditButtonToggle())>Edit</button></td>
                </tr>
                @if(bnb.RentingPeriods != null){
                     @foreach (var rentingperiod in @bnb.RentingPeriods)
@@ -42,6 +43,11 @@ else
 
             </table>
         }
+
+        if (editBNB)
+        {
+            <UpdateBNB BNB=bnbRequest UserData=userdata/>
+        }
     }
 }
 
@@ -50,8 +56,10 @@ else
     public string? id { get; set; }
 
     private BNBResponse bnb;
+    private BNBRequest bnbRequest;
     private bool getBnbsError;
     private bool shouldRender;
+    private bool editBNB = false;
     string userdata;
 
     private async Task<string> GetJWT()
@@ -64,6 +72,26 @@ else
                 return dataArray[1];
         }
         return null;
+    }
+
+    private void EditButtonToggle()
+    {
+        if(bnbRequest == null)
+        {
+            bnbRequest = new BNBRequest
+	        {
+		        ID = bnb.ID,
+		        Title = bnb.Title,
+		        Description = bnb.Description,
+		        Address = bnb.Address,
+		        Country = bnb.Country,
+		        ZipCode = bnb.ZipCode,
+		        TypeOfEstablishment = bnb.TypeOfEstablishment
+	        };
+        }
+
+        editBNB = !editBNB;
+        StateHasChanged();
     }
 
     protected override bool ShouldRender() => shouldRender;

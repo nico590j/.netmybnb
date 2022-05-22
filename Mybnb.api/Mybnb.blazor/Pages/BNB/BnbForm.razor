@@ -1,0 +1,38 @@
+﻿@using Mybnb.dtolibrary.DTOs.BNB
+<h3>BnbForm</h3>
+    <EditForm Model="@BnbRequest" OnValidSubmit="@SubmitMethod">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <label>Overskrift: <InputText id="Title" @bind-Value="BnbRequest.Title" />
+        </label><br />
+        <label> Beskrivelse:
+        <InputText id="Description" @bind-Value="BnbRequest.Description" />
+        </label><br />
+        <label for="Address"> Adresse
+            <InputText id="Address" @bind-Value="BnbRequest.Address" />
+        </label>
+        <br />
+        <label for="ZipCode"> Postnr.
+            <InputText id="ZipCode" @bind-Value="BnbRequest.ZipCode" />
+        </label>
+        <br />
+        <label for="Country"> Land
+            <InputText id="Country" @bind-Value="BnbRequest.Country" />
+        </label>
+        <br />
+
+        <button type="submit">Submit</button>
+    </EditForm>
+@code {
+    [Parameter]
+    public BNBRequest BnbRequest { get; set; }
+
+    [Parameter] 
+    public Action SubmitMethod { get; set; }
+
+    private void InvokeParentMethod()
+    {
+        SubmitMethod?.Invoke();
+    }
+
+}

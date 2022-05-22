@@ -117,7 +117,7 @@ namespace Mybnb.blazor.Data
 
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<BNBResponse> CreateBNBsAsync(CreateBNB body)
+        public System.Threading.Tasks.Task<BNBResponse> CreateBNBsAsync(BNBRequest body)
         {
             return CreateBNBsAsync(body, System.Threading.CancellationToken.None);
         }
@@ -125,7 +125,7 @@ namespace Mybnb.blazor.Data
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<BNBResponse> CreateBNBsAsync(CreateBNB body, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<BNBResponse> CreateBNBsAsync(BNBRequest body, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/BNBs");
@@ -258,22 +258,22 @@ namespace Mybnb.blazor.Data
 
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task UpdateBNB(int id, BNB body)
+        public System.Threading.Tasks.Task<bool> UpdateBNB(BNBRequest body)
         {
-            return UpdateBNB(id, body, System.Threading.CancellationToken.None);
+            return UpdateBNB(body, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task UpdateBNB(int id, BNB body, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<bool> UpdateBNB(BNBRequest body, System.Threading.CancellationToken cancellationToken)
         {
-            if (id == null)
+            if (body.ID == null)
                 throw new System.ArgumentNullException("id");
 
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/BNBs/{id}");
-            urlBuilder_.Replace("{id}", System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
+            urlBuilder_.Replace("{id}", System.Uri.EscapeDataString(ConvertToString(body.ID, System.Globalization.CultureInfo.InvariantCulture)));
 
             var client_ = _httpClient;
             try
@@ -303,9 +303,9 @@ namespace Mybnb.blazor.Data
                         ProcessResponse(client_, response_);
 
                         var status_ = ((int)response_.StatusCode).ToString();
-                        if (status_ == "200")
+                        if (status_ == "204")
                         {
-                            return;
+                            return true;
                         }
                         else
                         if (status_ != "200" && status_ != "204")
@@ -323,7 +323,9 @@ namespace Mybnb.blazor.Data
             }
             finally
             {
+
             }
+            return false;
         }
 
         /// <returns>Success</returns>

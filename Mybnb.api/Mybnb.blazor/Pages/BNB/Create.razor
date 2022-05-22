@@ -7,7 +7,7 @@
 @using Mybnb.dtolibrary.DTOs.BNB;
 @using System.Net.Http.Headers;
 @inject IJSRuntime jsr;
-@inject ILogger<CreateBNB> Logger
+@inject ILogger<BNBRequest> Logger
 
 @if (string.IsNullOrEmpty(userdata))
 {
@@ -19,7 +19,7 @@ else
     {
         <h2>Din bolig er nu oprettet i vores system</h2>
     }
-    <EditForm Model="@createBnb" OnValidSubmit="@HandleValidSubmit">
+    @*<EditForm Model="@createBnb" OnValidSubmit="@HandleValidSubmit">
         <DataAnnotationsValidator />
         <ValidationSummary />
         <label>Overskrift: <InputText id="Title" @bind-Value="createBnb.Title" />
@@ -41,11 +41,14 @@ else
         <br />
 
         <button type="submit">Submit</button>
-    </EditForm>
+    </EditForm>*@
+
+
+    <BnbForm SubmitMethod=@HandleValidSubmit BnbRequest=createBnb/>
 }
 
 @code {
-    private CreateBNB createBnb = new();
+    private BNBRequest createBnb = new();
     private bool success = false;
     private string userdata;
 

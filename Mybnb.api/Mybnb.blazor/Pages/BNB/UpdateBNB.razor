@@ -1,0 +1,51 @@
+﻿@using Microsoft.Extensions.Logging;
+@using Mybnb.blazor.Data
+@using Mybnb.dtolibrary.DTOs.BNB;
+@inject IJSRuntime jsr;
+@inject ILogger<BNBRequest> Logger
+@using Mybnb.blazor.Pages.BNB;
+@using System.Net.Http.Headers
+
+<h3>UpdateBNB</h3>
+
+<BnbForm BnbRequest=BNB SubmitMethod=@HandleValidSubmit/>
+
+@if(succes){
+    <p>Update Successfully changed</p>
+}
+
+@code {
+
+    [Parameter]
+    public BNBRequest BNB { get; set; }
+
+    private bool succes = false;
+
+    [Parameter]
+    public string UserData{ get; set; }
+
+    private async Task<string> GetJWT()
+    {
+        if (!string.IsNullOrWhiteSpace(UserData))
+        {
+            var dataArray = UserData.Split(';', 2);
+            if (dataArray.Length == 2)
+                return dataArray[1];
+        }
+        return null;
+    }
+
+    private async void HandleValidSubmit(){
+        Logger.LogInformation("HandleValidSubmit called");
+
+        // Process the valid form
+        HttpClient httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await GetJWT());
+        var request = new mybnbApiClient("https://localhost:7258", httpClient);
+
+        var succes = await request.UpdateBNB(BNB);
+
+        StateHasChanged();
+    }
+
+}
