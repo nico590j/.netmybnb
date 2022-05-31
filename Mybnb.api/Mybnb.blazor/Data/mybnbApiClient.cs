@@ -576,7 +576,7 @@ namespace Mybnb.blazor.Data
                         ProcessResponse(client_, response_);
 
                         var status_ = ((int)response_.StatusCode).ToString();
-                        if (status_ == "200")
+                        if (status_ == "201")
                         {
                             var objectResponse_ = await ReadObjectResponseAsync<PossibleRentingPeriodResponse>(response_, headers_).ConfigureAwait(false);
                             return objectResponse_.Object;

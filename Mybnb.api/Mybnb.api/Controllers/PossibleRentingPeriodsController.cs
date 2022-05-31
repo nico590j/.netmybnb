@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Mybnb.api.Data;
 using Mybnb.api.Models;
 using Mybnb.dtolibrary.DTOs.BNB;
+using AutoMapper;
 
 namespace Mybnb.api.Controllers
 {
@@ -20,36 +21,24 @@ namespace Mybnb.api.Controllers
     public class PossibleRentingPeriodsController : ControllerBase
     {
         private readonly MybnbapiContext _context;
-        private object bNBRequest;
+        private readonly IMapper _mapper;
 
-        public PossibleRentingPeriodsController(MybnbapiContext context)
+        public PossibleRentingPeriodsController(MybnbapiContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/PossibleRentingPeriods
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<PossibleRentingPeriod>>> GetPossibleRentingPeriod()
+        [HttpGet("{bnbId}")]
+        public async Task<ActionResult<IEnumerable<PossibleRentingPeriodResponse>>> GetPossibleRentingPeriod(int bnbId)
         {
-            return await _context.PossibleRentingPeriods.ToListAsync();
-        }
+            var posibleRentingPeriods = await _context.PossibleRentingPeriods.Where(x => x.BNBID == bnbId).ToListAsync();
 
-        // GET: api/PossibleRentingPeriods/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<PossibleRentingPeriod>> GetPossibleRentingPeriod(int id)
-        {
-            var possibleRentingPeriod = await _context.PossibleRentingPeriods.FindAsync(id);
-
-            if (possibleRentingPeriod == null)
-            {
-                return NotFound();
-            }
-
-            return possibleRentingPeriod;
+            return _mapper.Map<List<PossibleRentingPeriod>, List<PossibleRentingPeriodResponse>>(posibleRentingPeriods);
         }
 
         // PUT: api/PossibleRentingPeriods/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPossibleRentingPeriod(int id, PossibleRentingPeriod possibleRentingPeriod)
         {
@@ -80,7 +69,6 @@ namespace Mybnb.api.Controllers
         }
 
         // POST: api/PossibleRentingPeriods
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("bnb/{bnbID}")]
         public async Task<ActionResult<PossibleRentingPeriodResponse>> PostPossibleRentingPeriod(int bnbID, PossibleRentingPeriodRequest possibleRentingPeriodRequest)
         {
@@ -100,18 +88,13 @@ namespace Mybnb.api.Controllers
             {
                 return Unauthorized();
             }
-
-            PossibleRentingPeriod possibleRentingPeriod = new PossibleRentingPeriod();
-            possibleRentingPeriod.StartDate = possibleRentingPeriodRequest.StartDate;
-            possibleRentingPeriod.EndDate = possibleRentingPeriodRequest.EndDate;
-            possibleRentingPeriod.MinimumRentingDays = possibleRentingPeriodRequest.MinimumRentingDays;
-            possibleRentingPeriod.DailyPrice = possibleRentingPeriodRequest.DailyPrice;
-
+            PossibleRentingPeriod possibleRentingPeriod = _mapper.Map<PossibleRentingPeriodRequest, PossibleRentingPeriod> (possibleRentingPeriodRequest);
+            
             bNB.RentingPeriods.Add(possibleRentingPeriod);
 
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPossibleRentingPeriod", new { id = possibleRentingPeriod.PossibleRentingPeriodID }, possibleRentingPeriod);
+            return CreatedAtAction("GetPossibleRentingPeriod", new { bnbId = bNB.ID }, bNB);
         }
 
         // DELETE: api/PossibleRentingPeriods/5

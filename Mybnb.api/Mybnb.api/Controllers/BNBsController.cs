@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,33 +18,25 @@ namespace Mybnb.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class BNBsController : ControllerBase
     {
         private readonly MybnbapiContext _context;
+        private readonly IMapper _mapper;
 
-        public BNBsController(MybnbapiContext context)
+        public BNBsController(MybnbapiContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/BNBs
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BNBResponse>>> GetBNB()
         {
-            List<BNBResponse> result = new List<BNBResponse>();
             var bnbs = await _context.BNBs.ToListAsync();
 
-            bnbs.ForEach(bnb => result.Add(new BNBResponse
-            {
-                ID = bnb.ID,
-                Description = bnb.Description,
-                Title = bnb.Title,
-                Address = bnb.Address,
-                Country = bnb.Country,
-                ZipCode = bnb.ZipCode,
-                TypeOfEstablishment = bnb.TypeOfEstablishment
-            }));
+            List<BNBResponse> result = _mapper.Map<List<BNB>, List<BNBResponse>>(bnbs);
 
             return result;
         }
@@ -59,36 +52,13 @@ namespace Mybnb.api.Controllers
                 return NotFound();
             }
 
-            BNBResponse bNBResponse = new BNBResponse();
-            bNBResponse.ID = bNB.ID;
-            bNBResponse.Address = bNB.Address;
-            bNBResponse.ZipCode = bNB.ZipCode;
-            bNBResponse.Country = bNB.Country;
-            bNBResponse.Title = bNB.Title;
-            bNBResponse.Description = bNB.Description;
-            bNBResponse.TypeOfEstablishment = bNB.TypeOfEstablishment;
-
-            List<PossibleRentingPeriodResponse> possibleRentingPeriodResponse = new List<PossibleRentingPeriodResponse>();
-
-            bNB.RentingPeriods.ForEach(x => possibleRentingPeriodResponse.Add(
-                new PossibleRentingPeriodResponse{ 
-                    PossibleRentingPeriodID = x.PossibleRentingPeriodID,
-                    DailyPrice = x.DailyPrice, 
-                    EndDate = x.EndDate, 
-                    MinimumRentingDays = x.MinimumRentingDays,
-                    StartDate = x.StartDate
-                }
-            ));
+            BNBResponse bNBResponse = _mapper.Map<BNB, BNBResponse>(bNB);
+            
+            List<PossibleRentingPeriodResponse> possibleRentingPeriodResponse = _mapper.Map<List<PossibleRentingPeriod>, List<PossibleRentingPeriodResponse>>(bNB.RentingPeriods);
             bNBResponse.RentingPeriods = possibleRentingPeriodResponse;
 
-            bNB.TenantPeriods.ForEach(x => bNBResponse.TenantPeriods.Add(
-                new TenantPeriodResponse
-                {
-                    TenantPeriodID = x.TenantPeriodID,
-                    EndDate = x.EndDate,
-                    StartDate = x.StartDate
-                }
-            ));
+            List<TenantPeriodResponse> tenantPeriodResponse = _mapper.Map<List<TenantPeriod>, List<TenantPeriodResponse>>(bNB.TenantPeriods);
+            bNBResponse.TenantPeriods = tenantPeriodResponse;
 
             return bNBResponse;
         }
@@ -103,16 +73,8 @@ namespace Mybnb.api.Controllers
                 return BadRequest();
             }
 
-            BNB bnb = new BNB
-            {
-                ID = bNBRequest.ID,
-                Title = bNBRequest.Title,
-                Description = bNBRequest.Description,
-                Address = bNBRequest.Address,
-                Country = bNBRequest.Country,
-                ZipCode = bNBRequest.ZipCode                
-            };
-
+            BNB bnb = _mapper.Map<BNBRequest, BNB>(bNBRequest);
+            
             _context.Entry(bnb).State = EntityState.Modified;
 
             try
@@ -136,7 +98,7 @@ namespace Mybnb.api.Controllers
 
         // POST: api/BNBs
         [HttpPost]
-        public async Task<ActionResult<BNBResponse>> PostBNB(BNBRequest createBNB)
+        public async Task<ActionResult<BNBResponse>> PostBNB(BNBRequest bNBRequest)
         {
             User user = CheckUserExists();
             if (user == null)
@@ -144,13 +106,8 @@ namespace Mybnb.api.Controllers
                 return Unauthorized();
             }
 
-            BNB bNB = new BNB();
-            bNB.Title = createBNB.Title;
-            bNB.Description = createBNB.Description;
-            bNB.Address = createBNB.Address;
-            bNB.ZipCode = createBNB.ZipCode;
-            bNB.Country = createBNB.Country;
-            bNB.TypeOfEstablishment = createBNB.TypeOfEstablishment;
+            BNB bNB = _mapper.Map<BNBRequest, BNB>(bNBRequest);
+
             bNB.Owner = user;
             bNB.Images = new List<BnbImage>();
             bNB.RentingPeriods = new List<PossibleRentingPeriod>();

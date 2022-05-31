@@ -10,5 +10,6 @@ namespace Mybnb.api.Models
         public DateTime EndDate { get; set; }
         public double DailyPrice { get; set; }
         public int MinimumRentingDays { get; set; }
+        public int BNBID { get; set; }
     }
 }
