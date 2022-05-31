@@ -16,6 +16,7 @@ namespace Mybnb.api.Models
         public List<TenantPeriod> TenantPeriods { get; set; }
 
         public BNBTypes TypeOfEstablishment{ get; set; }
+        public int OwnerUserID { get; set; }
         public User Owner { get; set; }
     }
 }
