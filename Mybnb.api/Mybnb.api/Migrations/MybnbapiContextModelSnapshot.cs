@@ -61,19 +61,6 @@ namespace Mybnb.api.Migrations
                     b.HasIndex("OwnerUserID");
 
                     b.ToTable("BNBs");
-
-                    b.HasData(
-                        new
-                        {
-                            ID = -1,
-                            Address = "test",
-                            Country = "DK",
-                            Description = "test data beskrivelse",
-                            OwnerUserID = -1,
-                            Title = "test",
-                            TypeOfEstablishment = 0,
-                            ZipCode = "1234"
-                        });
                 });
 
             modelBuilder.Entity("Mybnb.api.Models.BnbImage", b =>
@@ -106,7 +93,7 @@ namespace Mybnb.api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PossibleRentingPeriodID"), 1L, 1);
 
-                    b.Property<int>("BNBID")
+                    b.Property<int?>("BNBID")
                         .HasColumnType("int");
 
                     b.Property<double>("DailyPrice")
@@ -126,17 +113,6 @@ namespace Mybnb.api.Migrations
                     b.HasIndex("BNBID");
 
                     b.ToTable("PossibleRentingPeriods");
-
-                    b.HasData(
-                        new
-                        {
-                            PossibleRentingPeriodID = -1,
-                            BNBID = -1,
-                            DailyPrice = 123456.0,
-                            EndDate = new DateTime(2022, 6, 24, 16, 48, 10, 468, DateTimeKind.Local).AddTicks(7021),
-                            MinimumRentingDays = 12,
-                            StartDate = new DateTime(2022, 5, 31, 16, 48, 10, 468, DateTimeKind.Local).AddTicks(7000)
-                        });
                 });
 
             modelBuilder.Entity("Mybnb.api.Models.TenantPeriod", b =>
@@ -194,15 +170,6 @@ namespace Mybnb.api.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            UserID = -1,
-                            Email = "test@edu.ucl.dk",
-                            FullName = "test",
-                            Password = "9F86D081884C7D659A2FEAA0C55AD015A3BF4F1B2B0B822CD15D6C15B0F00A08"
-                        });
                 });
 
             modelBuilder.Entity("Mybnb.api.Models.BNB", b =>
@@ -227,9 +194,7 @@ namespace Mybnb.api.Migrations
                 {
                     b.HasOne("Mybnb.api.Models.BNB", null)
                         .WithMany("RentingPeriods")
-                        .HasForeignKey("BNBID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("BNBID");
                 });
 
             modelBuilder.Entity("Mybnb.api.Models.TenantPeriod", b =>
