@@ -29,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="APIDATA\mybnbApi.json" />
+    <OpenApiReference Include="APIDATA\mybnbApi.json" CodeGenerator="NSwagCSharp" />
   </ItemGroup>
 
 </Project>

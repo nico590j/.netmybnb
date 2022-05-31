@@ -19,7 +19,6 @@ using Microsoft.AspNetCore.Authorization;
 using Mybnb.dtolibrary.DTOs.User;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
-using AutoMapper;
 
 namespace Mybnb.api.Controllers
 {
@@ -29,13 +28,11 @@ namespace Mybnb.api.Controllers
     {
         private readonly MybnbapiContext _context;
         private readonly AppSettings _appSettings;
-        private readonly IMapper _mapper;
 
-        public UsersController(MybnbapiContext context, IOptions<AppSettings> appSettings, IMapper mapper)
+        public UsersController(MybnbapiContext context, IOptions<AppSettings> appSettings)
         {
             _context = context;
             _appSettings = appSettings.Value;
-            _mapper = mapper;
         }
 
         // GET: api/Users
@@ -49,7 +46,7 @@ namespace Mybnb.api.Controllers
         // GET: api/Users/5
         [HttpGet("{id}")]
         [Authorize]
-        public async Task<ActionResult<UserResponse>> GetUser(int id)
+        public async Task<ActionResult<User>> GetUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
 
@@ -58,7 +55,7 @@ namespace Mybnb.api.Controllers
                 return NotFound();
             }
 
-            return _mapper.Map<User, UserResponse>(user);
+            return user;
         }
 
         // PUT: api/Users/5
@@ -96,7 +93,7 @@ namespace Mybnb.api.Controllers
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<UserResponse>> PostUser(CreateUser createUser)
+        public async Task<ActionResult<User>> PostUser(CreateUser createUser)
         {
 
             string hashedPassword = EncryptPassword(createUser.Password);
@@ -132,8 +129,9 @@ namespace Mybnb.api.Controllers
 
         //CREATE LOGIN HERE
         [HttpPost("authenticate")]
-        public async Task<ActionResult<AuthenticateResponse>> Authenticate(AuthenticateRequest model)
+        public async Task<ActionResult<User>> Authenticate(AuthenticateRequest model)
         {
+
             string hashedPassword = EncryptPassword(model.Password);
 
             var user = _context.Users.SingleOrDefault(x => x.Email == model.Email && x.Password == hashedPassword);
@@ -145,9 +143,8 @@ namespace Mybnb.api.Controllers
             // authentication successful so generate jwt token
             var token = GenerateJWTToken(user);
 
-            AuthenticateResponse response = _mapper.Map<User, AuthenticateResponse>(user);
-            response.Token = token;
-            
+            var response = new AuthenticateResponse(user.UserID, user.Email, token);
+
             return Ok(response);
         }
         [HttpGet]

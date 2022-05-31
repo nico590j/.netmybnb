@@ -1,4 +1,4 @@
-    using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -9,8 +9,6 @@ using Mybnb.api.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using AutoMapper;
-using Mybnb.api.Mapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,8 +23,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
-builder.Services.AddAutoMapper(typeof(MappingProfile));
-
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 
 var key = Encoding.ASCII.GetBytes(builder.Configuration.GetSection("Appsettings:Secret").Value);

@@ -19,7 +19,31 @@ else
     {
         <h2>Din bolig er nu oprettet i vores system</h2>
     }
-    
+    @*<EditForm Model="@createBnb" OnValidSubmit="@HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <label>Overskrift: <InputText id="Title" @bind-Value="createBnb.Title" />
+        </label><br />
+        <label> Beskrivelse:
+        <InputText id="Description" @bind-Value="createBnb.Description" />
+        </label><br />
+        <label for="Address"> Adresse
+            <InputText id="Address" @bind-Value="createBnb.Address" />
+        </label>
+        <br />
+        <label for="ZipCode"> Postnr.
+            <InputText id="ZipCode" @bind-Value="createBnb.ZipCode" />
+        </label>
+        <br />
+        <label for="Country"> Land
+            <InputText id="Country" @bind-Value="createBnb.Country" />
+        </label>
+        <br />
+
+        <button type="submit">Submit</button>
+    </EditForm>*@
+
+
     <BnbForm SubmitMethod=@HandleValidSubmit BnbRequest=createBnb/>
 }
 
@@ -65,4 +89,5 @@ else
             InvokeAsync(StateHasChanged);
         }
     }
+    
 }

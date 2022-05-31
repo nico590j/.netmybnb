@@ -12,10 +12,6 @@ namespace Mybnb.dtolibrary.DTOs
         public string Email { get; set; }
         public string Token { get; set; }
 
-        public AuthenticateResponse()
-        {
-
-        }
         public AuthenticateResponse(int userId, string email, string token)
         {
             Id = userId;
