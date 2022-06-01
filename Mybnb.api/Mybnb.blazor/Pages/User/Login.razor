@@ -9,6 +9,7 @@
 @inject ILogger<CreateUser> Logger
 @inject IJSRuntime jsr
 @inject NavigationManager NavigationManager;
+@inject ApiService_Authentication AuthenticationService
 
 <h3>Login</h3>
 
@@ -45,20 +46,18 @@
         isDisabled = true;
         Logger.LogInformation("HandleValidSubmit called");
 
-        // Process the valid form
-        var request = new mybnbApiClient("https://localhost:7258", new HttpClient());
         message = null;
         try
         {
-            var allBnbs = await request.AuthenticateAsync(authenticateModel);
-
-            if (allBnbs != null)
+            var Response = await AuthenticationService.Authenticate(authenticateModel);
+            if (Response != null)
             {
                 success = true;
                 isDisabled = false;
-                await jsr.InvokeVoidAsync("localStorage.setItem", "user", $"{allBnbs.Id};{allBnbs.Token}").ConfigureAwait(false);
+                await jsr.InvokeVoidAsync("localStorage.setItem", "user", $"{Response.Id};{Response.Token}").ConfigureAwait(false);
 
             }
+
         } catch (Exception e)
         {
             isDisabled = false;

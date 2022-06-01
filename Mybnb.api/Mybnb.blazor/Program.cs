@@ -4,6 +4,10 @@ using Mybnb.blazor.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//Dependency injections 
+builder.Services.AddHttpClient<ApiService_Authentication>();
+
+
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
